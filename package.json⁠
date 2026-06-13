@@ -1,0 +1,7 @@
+{
+  "name": "api-pdf",
+  "version": "1.0.0",
+  "dependencies": {
+    "pdf-lib": "^1.17.5"
+  }
+}
