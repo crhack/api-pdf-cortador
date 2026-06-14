@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "functions": {
+    "api/dividir.js": {
+      "runtime": "@vercel/node"
+    }
+  },
+  "routes": [
+    { "src": "/api/dividir", "dest": "/api/dividir.js" }
+  ]
+}
