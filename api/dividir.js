@@ -35,3 +35,4 @@ module.exports = async (req, res) => {
     res.status(500).json({ error: 'Fallo interno al procesar el documento' });
   }
 };
+⁠// Forzando el build en Vercel⁠
