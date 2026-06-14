@@ -1,37 +1,42 @@
-const { PDFDocument } = require('pdf-lib');
+export const config = {
+  runtime: 'edge',
+};
 
-module.exports = async (req, res) => {
-  // 1. Filtro de seguridad: solo aceptar POST
+import { PDFDocument } from 'https://esm.sh/pdf-lib';
+
+export default async function handler(req) {
   if (req.method !== 'POST') {
-    return res.status(405).send('Solo POST');
+    return new Response('Solo POST', { status: 405 });
   }
 
   try {
-    const { archivo_pdf } = req.body;
+    const body = await req.json();
+    const archivo_pdf = body.archivo_pdf;
     
-    // 2. Filtro: Si llega vacío, avisamos
     if (!archivo_pdf) {
-       return res.status(400).send('No se recibio el archivo PDF');
+       return new Response(JSON.stringify({ error: 'No se recibio PDF' }), { 
+         status: 400,
+         headers: { 'Content-Type': 'application/json' }
+       });
     }
 
-    // 3. Cargamos el PDF de tu iPhone
     const pdfOriginal = await PDFDocument.load(archivo_pdf);
-    
-    // 4. Creamos un lienzo en blanco
     const pdfNuevo = await PDFDocument.create();
 
-    // 5. Extraemos la primera hoja (índice 0)
     const [paginaCopiada] = await pdfNuevo.copyPages(pdfOriginal, [0]);
     pdfNuevo.addPage(paginaCopiada);
 
-    // 6. Empaquetamos en Base64
     const pdfBase64 = await pdfNuevo.saveAsBase64();
 
-    // 7. Devolvemos el JSON perfecto
-    res.status(200).json({ resultado_pdf: pdfBase64 });
+    return new Response(JSON.stringify({ resultado_pdf: pdfBase64 }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
     
   } catch (error) {
-    // Si la librería falla, devolvemos JSON (no HTML)
-    res.status(500).json({ error: 'Fallo interno al procesar el documento' });
+    return new Response(JSON.stringify({ error: error.message }), { 
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
-};
+}
