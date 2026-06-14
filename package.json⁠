@@ -1,3 +1,12 @@
 {
-"dependencies":{"pdf-lib":"1.17.5"}
+  "engines": {
+    "node": "20.x"
+  },
+  "scripts": {
+    "build": "echo 'Forzando build de Vercel'"
+  },
+  "dependencies": {
+    "pdf-lib": "1.17.5"
+  }
 }
+
