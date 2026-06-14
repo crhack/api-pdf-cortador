@@ -1,29 +1,37 @@
 const { PDFDocument } = require('pdf-lib');
 
-export default async function handler(req, res) {
-  // Solo permitimos peticiones POST (las que mandan archivos)
-  if (req.method !== 'POST') return res.status(405).send('Solo POST');
+module.exports = async (req, res) => {
+  // 1. Filtro de seguridad: solo aceptar POST
+  if (req.method !== 'POST') {
+    return res.status(405).send('Solo POST');
+  }
 
   try {
     const { archivo_pdf } = req.body;
     
-    // 1. Cargamos el PDF que viene en Base64 desde tu iPhone
+    // 2. Filtro: Si llega vacío, avisamos
+    if (!archivo_pdf) {
+       return res.status(400).send('No se recibio el archivo PDF');
+    }
+
+    // 3. Cargamos el PDF de tu iPhone
     const pdfOriginal = await PDFDocument.load(archivo_pdf);
     
-    // 2. Creamos un PDF nuevo y en blanco
+    // 4. Creamos un lienzo en blanco
     const pdfNuevo = await PDFDocument.create();
 
-    // 3. Copiamos la primera página (el índice es 0)
+    // 5. Extraemos la primera hoja (índice 0)
     const [paginaCopiada] = await pdfNuevo.copyPages(pdfOriginal, [0]);
     pdfNuevo.addPage(paginaCopiada);
 
-    // 4. Lo volvemos a empaquetar en Base64 para devolverlo
+    // 6. Empaquetamos en Base64
     const pdfBase64 = await pdfNuevo.saveAsBase64();
 
-    // 5. Respondemos al iPhone
+    // 7. Devolvemos el JSON perfecto
     res.status(200).json({ resultado_pdf: pdfBase64 });
     
   } catch (error) {
-    res.status(500).json({ error: 'Hubo un error al procesar el PDF' });
+    // Si la librería falla, devolvemos JSON (no HTML)
+    res.status(500).json({ error: 'Fallo interno al procesar el documento' });
   }
-}
+};
